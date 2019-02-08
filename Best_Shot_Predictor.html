@@ -98,6 +98,9 @@ img {
 button.code-folding-btn:focus {
   outline: none;
 }
+summary {
+  display: list-item;
+}
 </style>
 
 
@@ -105,14 +108,74 @@ button.code-folding-btn:focus {
 <div class="container-fluid main-container">
 
 <!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
 <script>
 $(document).ready(function () {
   window.buildTabsets("TOC");
 });
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
 </script>
 
 <!-- code folding -->
-
 
 
 
@@ -132,12 +195,18 @@ $(document).ready(function () {
 <pre class="r"><code>#pca
 setwd(&quot;~/shots&quot;)
 library(tidyverse)</code></pre>
-<pre><code>## -- Attaching packages --------------------------------------------- tidyverse 1.2.1 --</code></pre>
-<pre><code>## v ggplot2 3.1.0     v purrr   0.2.5
-## v tibble  1.4.2     v dplyr   0.7.8
+<pre><code>## Warning: package 'tidyverse' was built under R version 3.5.2</code></pre>
+<pre><code>## -- Attaching packages -------------------------------------------------------- tidyverse 1.2.1 --</code></pre>
+<pre><code>## v ggplot2 3.1.0     v purrr   0.3.0
+## v tibble  2.0.1     v dplyr   0.7.8
 ## v tidyr   0.8.2     v stringr 1.3.1
 ## v readr   1.3.1     v forcats 0.3.0</code></pre>
-<pre><code>## -- Conflicts ------------------------------------------------ tidyverse_conflicts() --
+<pre><code>## Warning: package 'ggplot2' was built under R version 3.5.2</code></pre>
+<pre><code>## Warning: package 'tibble' was built under R version 3.5.2</code></pre>
+<pre><code>## Warning: package 'readr' was built under R version 3.5.2</code></pre>
+<pre><code>## Warning: package 'purrr' was built under R version 3.5.2</code></pre>
+<pre><code>## Warning: package 'dplyr' was built under R version 3.5.2</code></pre>
+<pre><code>## -- Conflicts ----------------------------------------------------------- tidyverse_conflicts() --
 ## x dplyr::filter() masks stats::filter()
 ## x dplyr::lag()    masks stats::lag()</code></pre>
 <pre class="r"><code>shots &lt;- read.csv(file = &quot;shots.csv&quot;, header = TRUE, stringsAsFactors = F, fill = T)
@@ -174,11 +243,11 @@ side &lt;- function(x) {
 # shots$courtside &lt;- factor(shots$courtside)
 # 
 
-set.seed(1991)
+set.seed(1990)
 
 shots &lt;- shots[, -c(2,3)]
 
-split &lt;- sample(nrow(shots[,2:c(ncol(shots))]), 8000)
+split &lt;- sample(nrow(shots[,2:c(ncol(shots))]), 7000)
 train &lt;- shots[split,]
 test &lt;- shots[-split,]
 library(boot)  
@@ -213,13 +282,13 @@ summary(best)</code></pre>
 <pre><code>## Fitting algorithm:  AIC-leaps
 ## Best Model:
 ##              df deviance
-## Null Model 7994 1737.829
-## Full Model 7999 1913.264
+## Null Model 6994 1522.765
+## Full Model 6999 1674.911
 ## 
 ##  likelihood-ratio test - GLM
 ## 
 ## data:  H0: Null Model vs. H1: Best Fit AIC-leaps
-## X = 175.43, df = 5, p-value &lt; 2.2e-16</code></pre>
+## X = 152.15, df = 5, p-value &lt; 2.2e-16</code></pre>
 <pre class="r"><code># library(randomForest)
 # rf &lt;- randomForest(made ~ ., data = train)
 #step &lt;- stepAIC(fit, direction = &quot;both&quot;)
@@ -252,16 +321,33 @@ please &lt;- predict(best$BestModel, newdata = test, type = 'response', interval
 <h1>Prediction Intervals for Shots</h1>
 <pre class="r"><code>head(please)</code></pre>
 <pre><code>##          fit       lwr       upr
-## 7  0.4877006 0.4591095 0.5162917
-## 8  0.4521489 0.4301035 0.4741943
-## 15 0.4495661 0.4358421 0.4632900
-## 16 0.4680225 0.4429824 0.4930625
-## 23 0.3266646 0.3082179 0.3451113
-## 25 0.3762763 0.3617593 0.3907934</code></pre>
+## 8  0.4454339 0.4224649 0.4684030
+## 11 0.4558055 0.4238540 0.4877570
+## 12 0.5139800 0.4934086 0.5345514
+## 15 0.4297436 0.4041014 0.4553857
+## 21 0.4721730 0.4472298 0.4971162
+## 25 0.3688495 0.3541967 0.3835022</code></pre>
 <pre class="r"><code>median(please[,3] - please[,2])</code></pre>
-<pre><code>## [1] 0.04247235</code></pre>
+<pre><code>## [1] 0.04634849</code></pre>
 <pre class="r"><code>mean(please[,3] - please[,2])</code></pre>
-<pre><code>## [1] 0.04593959</code></pre>
+<pre><code>## [1] 0.05101969</code></pre>
+</div>
+<div id="evaluating-model-by-displaying-the-mean-field-goal-percentage-of-shots-in-upper-and-lower-quantiles-of-our-prediction-intervals." class="section level1">
+<h1>Evaluating model by displaying the mean field goal percentage of shots in upper and lower quantiles of our prediction intervals.</h1>
+<pre class="r"><code>badshots &lt;- test[which(please[,1] &lt; .4),]
+
+
+paste(&quot;number of 'bad shots'&quot;, nrow(badshots))</code></pre>
+<pre><code>## [1] &quot;number of 'bad shots' 1454&quot;</code></pre>
+<pre class="r"><code>paste(&quot;field goal percentage of 'bad shots'&quot;, round(mean(badshots$made), 2))</code></pre>
+<pre><code>## [1] &quot;field goal percentage of 'bad shots' 0.29&quot;</code></pre>
+<pre class="r"><code>goodshots &lt;- test[which(please[,2] &gt; .6),]
+
+
+paste(&quot;number of 'good shots'&quot;, nrow(goodshots))</code></pre>
+<pre><code>## [1] &quot;number of 'good shots' 45&quot;</code></pre>
+<pre class="r"><code>paste(&quot;field goal percentage of 'good shots'&quot;, round(mean(goodshots$made), 2))</code></pre>
+<pre><code>## [1] &quot;field goal percentage of 'good shots' 0.93&quot;</code></pre>
 </div>
 
 

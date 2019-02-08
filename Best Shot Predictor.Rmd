@@ -48,11 +48,11 @@ side <- function(x) {
 # shots$courtside <- factor(shots$courtside)
 # 
 
-set.seed(1991)
+set.seed(1990)
 
 shots <- shots[, -c(2,3)]
 
-split <- sample(nrow(shots[,2:c(ncol(shots))]), 8000)
+split <- sample(nrow(shots[,2:c(ncol(shots))]), 7000)
 train <- shots[split,]
 test <- shots[-split,]
 library(boot)  
@@ -107,5 +107,27 @@ please <- predict(best$BestModel, newdata = test, type = 'response', interval = 
 head(please)
 median(please[,3] - please[,2])
 mean(please[,3] - please[,2])
+```
+
+
+
+#Evaluating model by displaying the mean field goal percentage of shots in upper and lower quantiles of our prediction intervals.
+```{r}
+
+badshots <- test[which(please[,1] < .4),]
+
+
+paste("number of 'bad shots'", nrow(badshots))
+
+paste("field goal percentage of 'bad shots'", round(mean(badshots$made), 2))
+
+
+
+goodshots <- test[which(please[,2] > .6),]
+
+
+paste("number of 'good shots'", nrow(goodshots))
+paste("field goal percentage of 'good shots'", round(mean(goodshots$made), 2))
+
 ```
 
