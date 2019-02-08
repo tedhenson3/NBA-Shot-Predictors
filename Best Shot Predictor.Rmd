@@ -5,11 +5,11 @@ date: "January 10, 2019"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, message = FALSE, warning=FALSE, echo = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r, eval = T, echo = F, message = F, include=FALSE, warning=FALSE}
 #pca
 setwd("~/shots")
 library(tidyverse)
@@ -91,39 +91,58 @@ summary(best)
 # 
 # best <- RESULT[which.min(RESULT$MSE), 'MSE']
 # best
-# please <- predict(fit, newx = as.matrix(test[,2:ncol(test)]), type = 'response', interval = 'confidence')
+# intervals <- predict(fit, newx = as.matrix(test[,2:ncol(test)]), type = 'response', interval = 'confidence')
 # 
-# median(please[,3] - please[,2])
-# mean(please[,3] - please[,2])
+# median(intervals[,3] - intervals[,2])
+# mean(intervals[,3] - intervals[,2])
 
-please <- predict(best$BestModel, newdata = test, type = 'response', interval = 'confidence')
+intervals <- predict(best$BestModel, newdata = test, type = 'response', interval = 'confidence')
 
+```
+#Preview of Data
+```{r, echo = F}
+head(shots, n = 4)
 ```
 
 
 #Prediction Intervals for Shots
-```{r}
+```{r, echo = FALSE}
 
-head(please)
-median(please[,3] - please[,2])
-mean(please[,3] - please[,2])
+head(intervals)
+paste("median difference in lower and upper interval bounds", round(median(intervals[,3] - intervals[,2]), 2))
+paste("mean difference in lower and upper interval bounds", round(mean(intervals[,3] - intervals[,2]), 2))
 ```
 
 
 
-#Evaluating model by displaying the mean field goal percentage of shots in upper and lower quantiles of our prediction intervals.
-```{r}
 
-badshots <- test[which(please[,1] < .4),]
+#Evaluating model by displaying the mean field goal percentage of shots in upper and lower quantiles of our prediction intervals.
+
+```{r, echo = F}
+paste("number of shots evaluated", nrow(test))
+
+```
+
+
+
+#Shots deemed low percentage
+```{r, echo = FALSE}
+
+
+badshots <- test[which(intervals[,1] < .4),]
 
 
 paste("number of 'bad shots'", nrow(badshots))
 
 paste("field goal percentage of 'bad shots'", round(mean(badshots$made), 2))
 
+```
 
 
-goodshots <- test[which(please[,2] > .6),]
+#Shots deemed high percentage
+```{r, echo = FALSE}
+
+goodshots <- test[which(intervals[,2] > .6),]
 
 
 paste("number of 'good shots'", nrow(goodshots))

@@ -192,134 +192,26 @@ $(document).ready(function () {
 </div>
 
 
-<pre class="r"><code>#pca
-setwd(&quot;~/shots&quot;)
-library(tidyverse)</code></pre>
-<pre><code>## Warning: package 'tidyverse' was built under R version 3.5.2</code></pre>
-<pre><code>## -- Attaching packages -------------------------------------------------------- tidyverse 1.2.1 --</code></pre>
-<pre><code>## v ggplot2 3.1.0     v purrr   0.3.0
-## v tibble  2.0.1     v dplyr   0.7.8
-## v tidyr   0.8.2     v stringr 1.3.1
-## v readr   1.3.1     v forcats 0.3.0</code></pre>
-<pre><code>## Warning: package 'ggplot2' was built under R version 3.5.2</code></pre>
-<pre><code>## Warning: package 'tibble' was built under R version 3.5.2</code></pre>
-<pre><code>## Warning: package 'readr' was built under R version 3.5.2</code></pre>
-<pre><code>## Warning: package 'purrr' was built under R version 3.5.2</code></pre>
-<pre><code>## Warning: package 'dplyr' was built under R version 3.5.2</code></pre>
-<pre><code>## -- Conflicts ----------------------------------------------------------- tidyverse_conflicts() --
-## x dplyr::filter() masks stats::filter()
-## x dplyr::lag()    masks stats::lag()</code></pre>
-<pre class="r"><code>shots &lt;- read.csv(file = &quot;shots.csv&quot;, header = TRUE, stringsAsFactors = F, fill = T)
-shots$r &lt;- sqrt(shots$shot_x^2 + shots$shot_y^2)
-
-#22 feet to corner, 23.75 feet on arc
-ll &lt;- sqrt(23.75^2 - 22^2)
-#shots$is.three &lt;- ((shots$shot_y &lt; ll) &amp; (shots$shot_x &gt; 22)) | (shots$r &gt;= 23.75)
-
-
-
-side &lt;- function(x) {
-  if (x &gt; 0) {
-    result &lt;- &quot;Right&quot;
-  }
-  else if (x &lt; 0) {
-    result &lt;- &quot;Left&quot;
-  }
-  else {
-    result &lt;- &quot;Zero&quot;
-  }
-  return(result)
-}
-# shots$courtside &lt;- sapply(shots$shot_x, FUN = side)
-# 
-# shots$defangleside &lt;- sapply(shots$defender_velocity_angle, FUN = side)
-# shots$defangle &lt;- sapply(shots$defender_velocity_angle, FUN = side)
-# 
-# shots$shootangleside &lt;- sapply(shots$shooter_velocity_angle, FUN = side)
-# 
-# shots$shootangleside &lt;- factor(shots$shootangleside)
-# shots$defangle &lt;- factor(shots$defangle)
-# shots$defangleside &lt;- factor(shots$defangleside)
-# shots$courtside &lt;- factor(shots$courtside)
-# 
-
-set.seed(1990)
-
-shots &lt;- shots[, -c(2,3)]
-
-split &lt;- sample(nrow(shots[,2:c(ncol(shots))]), 7000)
-train &lt;- shots[split,]
-test &lt;- shots[-split,]
-library(boot)  
-library(glmnet)</code></pre>
-<pre><code>## Loading required package: Matrix</code></pre>
-<pre><code>## 
-## Attaching package: 'Matrix'</code></pre>
-<pre><code>## The following object is masked from 'package:tidyr':
-## 
-##     expand</code></pre>
-<pre><code>## Loading required package: foreach</code></pre>
-<pre><code>## 
-## Attaching package: 'foreach'</code></pre>
-<pre><code>## The following objects are masked from 'package:purrr':
-## 
-##     accumulate, when</code></pre>
-<pre><code>## Loaded glmnet 2.0-16</code></pre>
-<pre class="r"><code>library(bestglm)</code></pre>
-<pre><code>## Loading required package: leaps</code></pre>
-<pre class="r"><code>library(MASS)</code></pre>
-<pre><code>## 
-## Attaching package: 'MASS'</code></pre>
-<pre><code>## The following object is masked from 'package:dplyr':
-## 
-##     select</code></pre>
-<pre class="r"><code>fit &lt;- glmnet(x = as.matrix(train[,2:ncol(train)]), y = as.vector(train$made) ,  family = 'binomial', alpha = .5)
-
-
-xy &lt;- cbind(train[,2:ncol(train)], train$made)
-best &lt;- bestglm(xy, IC = 'AIC')
-summary(best)</code></pre>
-<pre><code>## Fitting algorithm:  AIC-leaps
-## Best Model:
-##              df deviance
-## Null Model 6994 1522.765
-## Full Model 6999 1674.911
-## 
-##  likelihood-ratio test - GLM
-## 
-## data:  H0: Null Model vs. H1: Best Fit AIC-leaps
-## X = 152.15, df = 5, p-value &lt; 2.2e-16</code></pre>
-<pre class="r"><code># library(randomForest)
-# rf &lt;- randomForest(made ~ ., data = train)
-#step &lt;- stepAIC(fit, direction = &quot;both&quot;)
-# 
-# RESULT=NULL
-# for (i in 0:100) {
-#   cv.out = cv.glmnet(x=as.matrix(train[,2:ncol(train)]),
-#                      y=as.vector(train$made),
-#                      type.measure=&quot;mse&quot;, 
-#                      alpha=i/100)
-#   alpha=i/100
-#   best.lambda=cv.out$lambda.1se
-#   y.test=predict(cv.out,s=best.lambda,newx=as.matrix(test[,2:ncol(test)]))
-#   out.mse=mean((as.vector(test$made)-y.test)^2)
-#   RESULT=rbind(RESULT,c(alpha,best.lambda,out.mse))
-# }
-# colnames(RESULT)=c(&quot;alpha&quot;,&quot;lambda&quot;,&quot;MSE&quot;)
-# RESULT &lt;- as.data.frame(RESULT)
-# print(RESULT)
-# 
-# best &lt;- RESULT[which.min(RESULT$MSE), 'MSE']
-# best
-# please &lt;- predict(fit, newx = as.matrix(test[,2:ncol(test)]), type = 'response', interval = 'confidence')
-# 
-# median(please[,3] - please[,2])
-# mean(please[,3] - please[,2])
-
-please &lt;- predict(best$BestModel, newdata = test, type = 'response', interval = 'confidence')</code></pre>
+<div id="preview-of-data" class="section level1">
+<h1>Preview of Data</h1>
+<pre><code>##   made shooter_velocity_ft_sec shooter_velocity_angle dribbles_before
+## 1    0                1.870883              23.618326               1
+## 2    0                1.001283             133.975882               0
+## 3    0               10.471914               4.918328               1
+## 4    0                2.230983             -96.206905               1
+##   defender_distance defender_angle defender_velocity_ft_sec
+## 1         10.004074       33.03691                 4.906114
+## 2          7.655019      -13.40452                 2.358548
+## 3          3.610886      167.80277                 2.075523
+## 4          1.113495      -17.56011                 3.045782
+##   defender_velocity_angle         r
+## 1               -59.10059 18.193530
+## 2                10.36283 23.098668
+## 3               -22.95902  4.476016
+## 4                82.61824 21.089940</code></pre>
+</div>
 <div id="prediction-intervals-for-shots" class="section level1">
 <h1>Prediction Intervals for Shots</h1>
-<pre class="r"><code>head(please)</code></pre>
 <pre><code>##          fit       lwr       upr
 ## 8  0.4454339 0.4224649 0.4684030
 ## 11 0.4558055 0.4238540 0.4877570
@@ -327,26 +219,21 @@ please &lt;- predict(best$BestModel, newdata = test, type = 'response', interval
 ## 15 0.4297436 0.4041014 0.4553857
 ## 21 0.4721730 0.4472298 0.4971162
 ## 25 0.3688495 0.3541967 0.3835022</code></pre>
-<pre class="r"><code>median(please[,3] - please[,2])</code></pre>
-<pre><code>## [1] 0.04634849</code></pre>
-<pre class="r"><code>mean(please[,3] - please[,2])</code></pre>
-<pre><code>## [1] 0.05101969</code></pre>
+<pre><code>## [1] &quot;median difference in lower and upper interval bounds 0.05&quot;</code></pre>
+<pre><code>## [1] &quot;mean difference in lower and upper interval bounds 0.05&quot;</code></pre>
 </div>
 <div id="evaluating-model-by-displaying-the-mean-field-goal-percentage-of-shots-in-upper-and-lower-quantiles-of-our-prediction-intervals." class="section level1">
 <h1>Evaluating model by displaying the mean field goal percentage of shots in upper and lower quantiles of our prediction intervals.</h1>
-<pre class="r"><code>badshots &lt;- test[which(please[,1] &lt; .4),]
-
-
-paste(&quot;number of 'bad shots'&quot;, nrow(badshots))</code></pre>
+<pre><code>## [1] &quot;number of shots evaluated 3000&quot;</code></pre>
+</div>
+<div id="shots-deemed-low-percentage" class="section level1">
+<h1>Shots deemed low percentage</h1>
 <pre><code>## [1] &quot;number of 'bad shots' 1454&quot;</code></pre>
-<pre class="r"><code>paste(&quot;field goal percentage of 'bad shots'&quot;, round(mean(badshots$made), 2))</code></pre>
 <pre><code>## [1] &quot;field goal percentage of 'bad shots' 0.29&quot;</code></pre>
-<pre class="r"><code>goodshots &lt;- test[which(please[,2] &gt; .6),]
-
-
-paste(&quot;number of 'good shots'&quot;, nrow(goodshots))</code></pre>
+</div>
+<div id="shots-deemed-high-percentage" class="section level1">
+<h1>Shots deemed high percentage</h1>
 <pre><code>## [1] &quot;number of 'good shots' 45&quot;</code></pre>
-<pre class="r"><code>paste(&quot;field goal percentage of 'good shots'&quot;, round(mean(goodshots$made), 2))</code></pre>
 <pre><code>## [1] &quot;field goal percentage of 'good shots' 0.93&quot;</code></pre>
 </div>
 
