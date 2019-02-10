@@ -18,7 +18,7 @@ shots$r <- sqrt(shots$shot_x^2 + shots$shot_y^2)
 
 #22 feet to corner, 23.75 feet on arc
 ll <- sqrt(23.75^2 - 22^2)
-#shots$is.three <- ((shots$shot_y < ll) & (shots$shot_x > 22)) | (shots$r >= 23.75)
+#shots$is.three <- ((shots$shot_y < ll) & (shots$shot_x > 22) * 100, "%", sep = "") | (shots$r >= 23.75)
 
 
 
@@ -106,7 +106,7 @@ head(shots, n = 4)
 ```
 
 
-#Prediction Estimates for Shots
+#Preview of prediction Estimates for Shots
 ```{r, echo = FALSE}
 
 head(intervals)
@@ -119,37 +119,81 @@ head(intervals)
 #Evaluating model by displaying the mean field goal percentage of shots in upper and lower quantiles of our prediction intervals.
 
 ```{r, echo = F}
-paste("number of shots evaluated", nrow(test))
+paste("number of shots evaluated: ", nrow(test), sep = "")
 
 ```
 
 
 
-#Shots deemed low percentage (prediction fit below .4)
+## Shots deemed low percentage (prediction fit below .4)
 ```{r, echo = FALSE}
 
 
 badshots <- test[which(intervals < .4),]
 
 
-paste("number of 'bad shots'", nrow(badshots))
-paste("percent of evaluated shots deemed 'bad'", nrow(badshots) / nrow(test))
+paste("number of 'bad shots': ", nrow(badshots))
+paste("percent of evaluated shots deemed 'bad': ", round(nrow(badshots) / nrow(test), 2) * 100, "%", sep = "")
 
-paste("field goal percentage of 'bad shots'", round(mean(badshots$made), 2))
+paste("field goal percentage of 'bad shots': ", round(mean(badshots$made), 2) * 100, "%", sep = "")
 
 ```
 
 
-#Shots deemed high percentage (prediction fit above .6)
+## Shots deemed high percentage (prediction fit above .6)
 ```{r, echo = FALSE}
 
 goodshots <- test[which(intervals > .6),]
 
 
-paste("number of 'good shots'", nrow(goodshots))
-paste("percent of evaluated shots deemed 'good'", nrow(goodshots) / nrow(test))
-paste("field goal percentage of 'good shots'", round(mean(goodshots$made), 2))
+paste("number of 'good shots': ", nrow(goodshots))
+paste("percent of evaluated shots deemed 'good': ", round(nrow(goodshots) / nrow(test), 2) * 100, "%", sep = "")
+paste("field goal percentage of 'good shots': ", round(mean(goodshots$made), 2) * 100, "%", sep = "")
 
 ```
 
+
+
+## Shots deemed above average (prediction fit below .6 and above .5)
+```{r, echo = FALSE}
+
+
+average.shots <- test[which(intervals <= .6 & intervals >= .5),]
+
+
+paste("number of 'above average shots': ", nrow(average.shots))
+paste("percent of evaluated shots deemed 'above average': ", round(nrow(average.shots) / nrow(test), 2) * 100, "%", sep = "")
+paste("field goal percentage of 'above average shots': ", round(mean(average.shots$made), 2) * 100, "%", sep = "")
+
+```
+
+
+
+## Shots deemed below average (prediction fit below .5 and above .4)
+```{r, echo = FALSE}
+
+
+average.shots <- test[which(intervals >= .4 & intervals <= .5),]
+
+
+paste("number of 'below average shots': ", nrow(average.shots))
+paste("percent of evaluated shots deemed 'below average': ", round(nrow(average.shots) / nrow(test), 2) * 100, "%", sep = "")
+paste("field goal percentage of 'below average shots': ", round(mean(average.shots$made), 2) * 100, "%", sep = "")
+
+```
+
+
+## Shots deemed average (prediction fit between .4 & .6)
+```{r, echo = FALSE}
+
+
+average.shots <- test[which(intervals <= .6 & intervals >= .4),]
+
+
+paste("number of 'average shots': ", nrow(average.shots))
+paste("percent of evaluated shots deemed 'average': ", round(nrow(average.shots) / nrow(test), 2) * 100, "%", sep = "")
+
+paste("field goal percentage of 'average shots': ", round(mean(average.shots$made), 2) * 100, "%", sep = "")
+
+```
 
