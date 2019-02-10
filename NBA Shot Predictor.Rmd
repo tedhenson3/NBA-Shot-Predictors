@@ -183,7 +183,7 @@ paste("field goal percentage of 'below average shots': ", round(mean(average.sho
 ```
 
 
-## Shots deemed average (prediction fit between .4 & .6)
+## Shots deemed average (prediction fit between .4 and .6)
 ```{r, echo = FALSE}
 
 
