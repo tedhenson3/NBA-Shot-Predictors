@@ -1,7 +1,6 @@
 ---
 title: "Predicting NBA shot success probability using logistic regression"
 author: "Ted Henson"
-date: "January 10, 2019"
 output: html_document
 ---
 
