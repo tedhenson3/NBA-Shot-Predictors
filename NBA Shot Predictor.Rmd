@@ -106,7 +106,7 @@ head(shots, n = 4)
 ```
 
 
-#Preview of prediction Estimates for Shots
+#Preview of predicted probabilities for shots
 ```{r, echo = FALSE}
 
 head(intervals)
@@ -116,7 +116,7 @@ head(intervals)
 
 
 
-#Evaluating model by displaying the mean field goal percentage of shots in upper and lower quantiles of our prediction intervals.
+#Evaluating model on test set
 
 ```{r, echo = F}
 paste("number of shots evaluated: ", nrow(test), sep = "")
